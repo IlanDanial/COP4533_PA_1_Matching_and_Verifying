@@ -36,15 +36,16 @@ def gale_shapley(hospitals, applicants, n):
     hospital_match = {i: None for i in range(1, n+1)}
     applicant_match = {i: None for i in range(1, n+1)}
     next_proposal = {i: 0 for i in range(1, n+1)}
-    matched_count = 0
-    
-    while matched_count < n:
+    applicant_rankings = {}
+    for applicant_id in applicants:
+        applicant_rankings[applicant_id] = {}
+        for rank, hospital_id in enumerate(applicants[applicant_id]):
+            applicant_rankings[applicant_id][hospital_id] = rank
+    free_hospitals = list(range(1, n + 1))
+
+    while free_hospitals:
         # Find an unmatched hospital
-        h = None
-        for hospital_id in hospitals:
-            if hospital_match[hospital_id] == None:
-                h = hospital_id
-                break
+        h = free_hospitals[-1]
         
         # h asks the next applicant on their preference list
         a = hospitals[h][next_proposal[h]]
@@ -53,17 +54,22 @@ def gale_shapley(hospitals, applicants, n):
         if applicant_match[a] == None:
             hospital_match[h] = a
             applicant_match[a] = h
-            matched_count += 1
+            free_hospitals.pop()
         
         # Case 2: Applicant a is has already been matched
         else:
+            new_rank = applicant_rankings[a][h]
+            cur_rank = applicant_rankings[a][applicant_match[a]]
             cur_h = applicant_match[a]
             # Check: if current hospital or new hospital is more preferred
-            if applicants[a].index(h) < applicants[a].index(cur_h):
+            if new_rank < cur_rank:
                 # Applicant a prefers new hospital h over current hospital cur_h
                 hospital_match[cur_h] = None
                 hospital_match[h] = a
                 applicant_match[a] = h
+                free_hospitals.pop()
+                free_hospitals.append(cur_h)
+                
         
         #  got to next applicant in the hospitals preference list
         next_proposal[h] += 1
