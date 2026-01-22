@@ -1,17 +1,35 @@
+def read_input(filename):
+    try:
+        with open(filename, 'r') as f:
+            data = f.read().split()
+        if not data:
+            return {}, {}, 0
+        iterator = iter(data)
+        n = int(next(iterator))
+        
+        hospitals = {}
+        applicants = {}
+        
+        for i in range(1, n + 1):
+            prefs = []
+            for _ in range(n):
+                prefs.append(int(next(iterator)))
+            hospitals[i] = prefs
+    
+        for i in range(1, n + 1):
+            prefs = []
+            for _ in range(n):
+                prefs.append(int(next(iterator)))
+            applicants[i] = prefs
+            
+        return hospitals, applicants, n
 
-
-
-# while (some hospital is free and hasn’t been matched/assigned to every applicant) {
-# Choose such a hospital h
-# a = 1st applicant on h's list to whom h has not been
-# matched
-# if (a is free)
-# assign h and a
-# else if (a prefers h to her/his current assignment h')
-# assign a and h, and h’ has a slot free
-# else
-# a rejects h
-# }
+    except FileNotFoundError:
+        print(f"Error: File '{filename}' not in directory.")
+        return {}, {}, 0
+    except StopIteration:
+        print("Error: Data mismatch.")
+        return {}, {}, 0
 
 def gale_shapley(hospitals, applicants, n):
     # Initialize
@@ -49,15 +67,30 @@ def gale_shapley(hospitals, applicants, n):
         
         #  got to next applicant in the hospitals preference list
         next_proposal[h] += 1
+    
+    return hospital_match
+
+def write_output(filename, result):
+
+    with open(filename, 'w') as f:
+        for hospital_id in sorted(result.keys()):
+            f.write(f"{hospital_id} {result[hospital_id]}\n")
+
 
 def main():
     #input
-    hospitals, applicants, n = read_input("example.in")
+    input_1 = input("Give the input file name: ")
+    output_1 = input("Give the output file name: ")
+
+    hospitals, applicants, n = read_input(input_1)
     #algorithm
     result = gale_shapley(hospitals, applicants, n)
+    
     #output
+    write_output(output_1, result)
     for hospital_id in sorted(result.keys()):
         print(f"{hospital_id} {result[hospital_id]}")
 
 if __name__ == "__main__":
+    main()
     
