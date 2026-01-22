@@ -1,3 +1,5 @@
+from taskB import checkValidityInput, checkValidityMatched
+
 def read_input(filename):
     try:
         with open(filename, 'r') as f:
@@ -81,6 +83,10 @@ def main():
     #input
     input_1 = input("Give the input file name: ")
     output_1 = input("Give the output file name: ")
+    input_validity = checkValidityInput(input_1)
+    if input_validity != "IsValid":
+        print(input_validity)
+        return
 
     hospitals, applicants, n = read_input(input_1)
     #algorithm
@@ -90,6 +96,8 @@ def main():
     write_output(output_1, result)
     for hospital_id in sorted(result.keys()):
         print(f"{hospital_id} {result[hospital_id]}")
+    matched_validity = checkValidityMatched(input_1, output_1)
+    print("Matched validity:", matched_validity)
 
 if __name__ == "__main__":
     main()
