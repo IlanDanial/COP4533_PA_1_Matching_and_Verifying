@@ -2,7 +2,63 @@
 # (a) Checks validity: each hospital and each student is matched to exactly one partner, with no duplicates
 # (b) checks stability: confirms there is no blocking pair.
 
-def checkValidity(inputFile, matchedFile):
+def checkValidityInput(inputFile):
+    #read example.in
+    # 3
+    # 1 2 3
+    # 2 3 1
+    # 2 1 3
+    # 2 1 3
+    # 1 2 3
+    # 1 2 3
+    with open(inputFile, 'r') as f:
+        firstLine = f.readline().strip() # 3
+        if firstLine == "":
+            return ("Error: Input file is empty")
+        
+        n = int(firstLine) # 3
+        if n <= 0:
+            return (f"Error: Number must be positive not {n}")
+        
+        # read hospital preferences
+        hospitalsPrefs = []
+        for i in range(n):
+            # hospital1 reads "1 2 3"
+            line = f.readline().strip()
+            if line == "":
+                return (f"Error: Incomplete hospital preferences at line {i + 2}")
+            
+            # hospital1 prefs = [1, 2, 3]
+            prefs = [int(x) for x in line.split()]
+            if len(prefs) != n:
+                return (f"Error: Hospital {i + 1} preferences length is not {n}")
+            
+            if set(prefs) != set(range(1, n + 1)):
+                return (f"Error: Hospital {i + 1} preferences must contain all applicants from 1 to {n}")
+
+            hospitalsPrefs.append(prefs)
+
+        # read applicant preferences
+        applicantsPrefs = []
+        # applicant1 reads "2 1 3"
+        for i in range(n):
+            line = f.readline().strip()
+            if line == "":
+                return (f"Error: Incomplete applicant preferences at line {i + 2 + n}")
+            
+            # applicant1 prefs = [2, 1, 3]
+            prefs = [int(x) for x in line.split()]
+            if len(prefs) != n:
+                return (f"Error: Applicant {i + 1} preferences length is not {n}")
+            
+            if set(prefs) != set(range(1, n + 1)):
+                return (f"Error: Applicant {i + 1} preferences must contain all hospitals from 1 to {n}")
+
+            applicantsPrefs.append(prefs)
+        
+    return "IsValid"
+
+def checkValidityMatched(inputFile, matchedFile):
     with open(inputFile, 'r') as f:
         n = int(f.readline().strip()) # 3
     
@@ -38,11 +94,11 @@ def checkValidity(inputFile, matchedFile):
 
             # check if hospital isn't matched 
             if hospitalsMatched[hospital] != -1:
-                return f"Invalid: Hospital {hospital + 1} matched more than once"
+                return f"Error: Hospital {hospital + 1} matched more than once"
             
             # check if applicant isn't matched
             if applicantsMatched[applicant]:
-                return f"Invalid: Applicant {applicant + 1} matched more than once"
+                return f"Error: Applicant {applicant + 1} matched more than once"
             
             # mark hospital as matched to applicant
             hospitalsMatched[hospital] = applicant
@@ -55,15 +111,26 @@ def checkValidity(inputFile, matchedFile):
     # check if all hospitals are matched
     for h in range(n):
         if hospitalsMatched[h] == -1:
-            return f"Invalid: Hospital {h + 1} is unmatched"
+            return f"Error: Hospital {h + 1} is unmatched"
         
     # check if all applicants are matched
     for a in range(n):
         if not applicantsMatched[a]:
-            return f"Invalid: Applicant {a + 1} is unmatched"
+            return f"Error: Applicant {a + 1} is unmatched"
         
     return "IsValid"
 
+# def checkStability(inputFile, matchedFile):
+
+        
 
 if __name__ == "__main__": 
-    print (checkValidity("example.in", "example.out"))
+    print("Input validity:", checkValidityInput("example.in"))
+    print("Matched validity:", checkValidityMatched("example.in", "example.out"))
+    #stability = checkStabilityMatched("example.in", "example.out")
+    #if validity != "IsValid":
+    #    print(validity)
+    #elif stability != "IsStable":
+    #    print(stability)
+    #else:
+    #    print("Matching is valid and stable.")
