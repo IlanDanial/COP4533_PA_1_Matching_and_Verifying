@@ -1,69 +1,91 @@
 # COP4533_PA_1_Matching_and_Verifying
-First programming assignment for COP4533
+## Team
+- Grecia Ocando — UFID: 34457048  
+- Ilan Danial — UFID: 51879329
 
-* Task A: Matching Engine *
-    Matching Engine: Implement the hospital-proposing deferred acceptance algorithm
-    - Initially, all hospitals are unmatched and have not proposed to anyone.
-    - While there exists an unmatched hospital that still has students left to propose to:
-        - The hospital proposes to the next student on its preference list that it has not yet proposed to.
-        - The student tentatively accepts the best hospital (according to the student's preferences) among its current tentative match (if any) and the new proposer, rejecting the other.
+---
+## Repository Structure
+- `taskA.py` — Task A: Matcher using Gale–Shapley Algorithm
+- `taskB.py` — Task B: Verifier testing the validity and stability
+- `taskC.py` — Task C: Scalability runtime measurements and graph for increasing `n`
+- `example.in` — Example input file of n hospitals, and n applicants with respective preferences
+- `example.out` — Example output file with matching pair
+- `data/` — Task C timing data and graph
 
-    Your program must output the final matching and (optionally) the number of proposals made.  See the pseudocode given in class for specific detail.
+---
+## Dependencies / Build Instructions
+No build is required.
 
-* Task B: Verifier *
-Write a separate program (or a separate mode in the same program) that:
-(a)  Checks validity: each hospital and each student is matched to exactly one partner, with no duplicates. And (b) checks stability: confirms there is no blocking pair.
+### Requirements
+- Python 3 (recommended 3.9+)
+- For Task C graphing: `matplotlib`
 
-* Task C: Scalability *
-Measure the running time of your matching engine on an increasingly larger number of hospitals/students, i.e., n = 1, 2, 4, 8, 16, 32, 64, 128, 256, 512 and graph the running time as a line graph when n on the x-axis and the running time on the y-axis.  Do the same for the verified.  What is the trend that you notice? Note: How you measure the running time is up to you (there are multiple ways of doing this) and will likely depend on which programming language you choose.
+---
+## Input Format
+The input describes preferences for a one-to-one market with complete strict rankings.
 
-* Input/Output Specification *
-Input Format: The input describes preferences for a one-to-one market with complete strict rankings.
-First line: integer n.
-Next n lines: hospital preference lists.
-Next n lines: student preference lists.
-Hence, each preference line contains n integers, a permutation of 1..n.
+- First line: integer n
+- Next n lines: hospital preference lists (each line contains n integers, a permutation of 1..n)
+- Next n lines: applicant/student preference lists (each line contains n integers, a permutation of 1..n)
 
-* Output Format for Verifier Algorithm *
-    Your verifier should print either:
+Example (example.in):
+```bash
+3
+1 2 3
+2 3 1
+2 1 3
+2 1 3
+1 2 3
+1 2 3
+```
 
-    VALID STABLE or
-    a clear failure message, e.g. INVALID (with reason) or UNSTABLE (with an example blocking pair).  If it is both UNSTABLE and INVALID then you can output both or one, your choice.
+---
+## Output Format
+### Matcher Output (Task A)
+The matcher prints and/or writes `n` lines, each containing:
+``` bash
+hospital_id applicant_id
+```
+Example (example.out):
+```bash
+1 2
+2 3
+3 1
+```
 
-    Example Input: example.in
+---
+## How to Run
+### Task A : Matcher 
+- Runs Verifier automatically
+Run:
+``` bash
+python3 taskA.py
+```
+When prompted:
+- Enter the input file name (ex: example.in)
+- Enter the output file name (ex: example.out)
 
-    3
-    1 2 3
-    2 3 1
-    2 1 3
-    2 1 3
-    1 2 3
-    1 2 3
+Task A generates the matching, writes it to the output file, prints the matching pairs, and then runs the verifier on the produced output. 
 
+### Task B: Verifier - Optional Standalone
+Run:
+``` bash
+python3 taskB.py example.in example.out
+```
+The Verifier prints either:
+- Valid Stable
+- Invalid: <reason>
+- Unstable: <blocking pair>
 
-    One Valid Output: example.out
-    1 2
-    2 3
-    3 1
+---
+### Task C Files
+Task C outputs are located in the data/ folder:
+- Timing results table: `data/<timing_results.csv>`
+- Scalability line graph `data/scalability_graph.png`
+![Task C Scalability Graph](data/scalability_graph.png)
 
-* Submission and Deliverables (GitHub) *
-    As discussed in class, you will submit your work as a GitHub repository on Canvas.  Only one of the partners should submit. Your repository must include:
-    - Source code for: 
-        The matcher (hospital-proposing Gale--Shapley), and
-        The \textbf{verifier} (validity + stability checker).
-    - Example inputs and outputs: At least one example input file and the corresponding expected output file.
-    - Your README must point to these files, explain how to reproduce the output and have the following:
-        - Both students' names and UFIDs.
-        - Instructions to compile/build your code (if applicable).
-        - Instructions to run the matcher and the verifier, including example commands.
-        - Any assumptions (input/output format, dependencies, etc.).
-        - Your graph and solution to Task C.
-
-* Tips: *
-Make sure you keep your repository structure clean and organized. i.e.,  Use a clean layout (e.g., src/, data/, tests/). Meaningful filenames; do not submit an unstructured dump of files
-A grader must be able to git clone the repository and follow the README to compile (if needed) and run your programs without additional steps.
-Choose a submission type
-
+Task C Trend:
+As n gets bigger, the program takes noticeably longer to run. That’s what we expect because in the worst case Gale–Shapley can make up to n squared proposals, so the matcher’s runtime grows like a quadratic function as n increases. The verifier shows a similar pattern since checking stability can involve comparing many possible hospital and applicant pairs. In our measurements, the runtimes are basically tiny for small n, but around n equals 256 and especially n equals 512, the times become much more noticeable, which fits this overall scaling trend.
 
 
 
