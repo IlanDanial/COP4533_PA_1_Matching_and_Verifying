@@ -1,4 +1,4 @@
-from taskB import checkValidityInput, checkValidityMatched
+from taskB import checkValidityInput, checkValidityMatched, checkStability
 
 def read_input(filename):
     try:
@@ -102,8 +102,18 @@ def main():
     write_output(output_1, result)
     for hospital_id in sorted(result.keys()):
         print(f"{hospital_id} {result[hospital_id]}")
+
     matched_validity = checkValidityMatched(input_1, output_1)
-    print("Matched validity:", matched_validity)
+    if matched_validity != "IsValid":
+        print(matched_validity)
+        return
+
+    stability = checkStability(input_1, output_1)
+    if stability != "IsStable":
+        print(stability)
+        return
+
+    print("VALID STABLE")
 
 if __name__ == "__main__":
     main()

@@ -14,11 +14,11 @@ def checkValidityInput(inputFile):
     with open(inputFile, 'r') as f:
         firstLine = f.readline().strip() # 3
         if firstLine == "":
-            return ("Error: Input file is empty")
+            return ("INVALID: Input file is empty")
         
         n = int(firstLine) # 3
         if n <= 0:
-            return (f"Error: Number must be positive not {n}")
+            return (f"INVALID: Number must be positive not {n}")
         
         # read hospital preferences
         hospitalsPrefs = []
@@ -26,15 +26,15 @@ def checkValidityInput(inputFile):
             # hospital1 reads "1 2 3"
             line = f.readline().strip()
             if line == "":
-                return (f"Error: Incomplete hospital preferences at line {i + 2}")
+                return (f"INVALID: Incomplete hospital preferences at line {i + 2}")
             
             # hospital1 prefs = [1, 2, 3]
             prefs = [int(x) for x in line.split()]
             if len(prefs) != n:
-                return (f"Error: Hospital {i + 1} preferences length is not {n}")
+                return (f"INVALID: Hospital {i + 1} preferences length is not {n}")
             
             if set(prefs) != set(range(1, n + 1)):
-                return (f"Error: Hospital {i + 1} preferences must contain all applicants from 1 to {n}")
+                return (f"INVALID: Hospital {i + 1} preferences must contain all applicants from 1 to {n}")
 
             hospitalsPrefs.append(prefs)
 
@@ -44,15 +44,15 @@ def checkValidityInput(inputFile):
         for i in range(n):
             line = f.readline().strip()
             if line == "":
-                return (f"Error: Incomplete applicant preferences at line {i + 2 + n}")
+                return (f"INVALID: Incomplete applicant preferences at line {i + 2 + n}")
             
             # applicant1 prefs = [2, 1, 3]
             prefs = [int(x) for x in line.split()]
             if len(prefs) != n:
-                return (f"Error: Applicant {i + 1} preferences length is not {n}")
+                return (f"INVALID: Applicant {i + 1} preferences length is not {n}")
             
             if set(prefs) != set(range(1, n + 1)):
-                return (f"Error: Applicant {i + 1} preferences must contain all hospitals from 1 to {n}")
+                return (f"INVALID: Applicant {i + 1} preferences must contain all hospitals from 1 to {n}")
 
             applicantsPrefs.append(prefs)
         
@@ -81,7 +81,7 @@ def checkValidityMatched(inputFile, matchedFile):
             # "1 2" into ["1", "2"]
             split = line.split() 
             if len(split) < 2:
-                return f"Error: Incorrect format for matching line '{line}'"
+                return f"INVALID: Incorrect format for matching line '{line}'"
             
             # hospital = 1 - 1 = 0 
             hospital = int(split[0]) - 1 
@@ -90,15 +90,14 @@ def checkValidityMatched(inputFile, matchedFile):
 
             # invalid hospital or applicant index
             if hospital < 0 or hospital >= n or applicant < 0 or applicant >= n:
-                return f"Error: Incorrect hospital or applicant index in line '{line}'"
-
+                return f"INVALID: Incorrect hospital or applicant index in line '{line}'"
             # check if hospital isn't matched 
             if hospitalsMatched[hospital] != -1:
-                return f"Error: Hospital {hospital + 1} matched more than once"
+                return f"UNSTABLE: Hospital {hospital + 1} matched more than once"
             
             # check if applicant isn't matched
             if applicantsMatched[applicant]:
-                return f"Error: Applicant {applicant + 1} matched more than once"
+                return f"UNSTABLE: Applicant {applicant + 1} matched more than once"
             
             # mark hospital as matched to applicant
             hospitalsMatched[hospital] = applicant
@@ -111,26 +110,87 @@ def checkValidityMatched(inputFile, matchedFile):
     # check if all hospitals are matched
     for h in range(n):
         if hospitalsMatched[h] == -1:
-            return f"Error: Hospital {h + 1} is unmatched"
+            return f"UNSTABLE: Hospital {h + 1} is unmatched"
         
     # check if all applicants are matched
     for a in range(n):
         if not applicantsMatched[a]:
-            return f"Error: Applicant {a + 1} is unmatched"
+            return f"UNSTABLE: Applicant {a + 1} is unmatched"
         
     return "IsValid"
 
-# def checkStability(inputFile, matchedFile):
+def checkStability(inputFile, matchedFile):
+    # Read input preferences
+    with open(inputFile, 'r') as f:
+        firstLine = f.readline().strip()
+        if firstLine == "":
+            return "INVALID: Input file is empty"
+        n = int(firstLine)
 
+        hospitalsPrefs = []
+        for i in range(n):
+            prefs = [int(x) -1 for x in f.readline().split()]
+            hospitalsPrefs.append(prefs)
         
+        applicantsPrefs = []
+        for i in range(n):
+            prefs = [int(x) -1 for x in f.readline().split()]
+            applicantsPrefs.append(prefs)
 
-if __name__ == "__main__": 
-    print("Input validity:", checkValidityInput("example.in"))
-    print("Matched validity:", checkValidityMatched("example.in", "example.out"))
-    #stability = checkStabilityMatched("example.in", "example.out")
-    #if validity != "IsValid":
-    #    print(validity)
-    #elif stability != "IsStable":
-    #    print(stability)
-    #else:
-    #    print("Matching is valid and stable.")
+    # Create applicant rank matrix 
+    applicantRank = [[0] * n for _ in range(n)]
+    for a in range(n):
+        for rank, h in enumerate(applicantsPrefs[a]):
+            # applicantRank[applicant][hospital] = rank
+            # applicantRank[0][1]=0 
+            applicantRank[a][h] = rank
+    
+    # Hospital and applicant matches
+    hospitalMatch = [-1] * n
+    applicantMatch = [-1] * n
+
+    with open(matchedFile, 'r') as f:
+        for line in f:
+            line = line.strip()
+            if not line:
+                continue
+
+            split = line.split()
+
+            hospital = int(split[0]) - 1
+            applicant = int(split[1]) - 1
+
+            hospitalMatch[hospital] = applicant
+            applicantMatch[applicant] = hospital
+    
+    # Check for blocking pairs
+    for h in range(n):
+        currentApplicant = hospitalMatch[h]
+        for preferredApplicant in hospitalsPrefs[h]:
+            if preferredApplicant == currentApplicant:
+                break
+            
+            matchedHospital = applicantMatch[preferredApplicant]
+            if applicantRank[preferredApplicant][h] < applicantRank[preferredApplicant][matchedHospital]:
+                return f"UNSTABLE: Blocking pair found: Hospital {h + 1} and Applicant {preferredApplicant + 1}"
+
+    return "IsStable"
+
+
+if __name__ == "__main__":
+    input_file = input("Give the input file name: ")
+    matched_file = input("Give the matched file name: ")
+
+    input_validity = checkValidityInput(input_file)
+    if input_validity != "IsValid":
+        print(input_validity)
+    else:
+        matched_validity = checkValidityMatched(input_file, matched_file)
+        if matched_validity != "IsValid":
+            print(matched_validity)
+        else:
+            stability = checkStability(input_file, matched_file)
+            if stability != "IsStable":
+                print(stability)
+            else:
+                print("VALID STABLE")

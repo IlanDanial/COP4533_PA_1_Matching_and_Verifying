@@ -70,8 +70,12 @@ Task A generates the matching, writes it to the output file, prints the matching
 ### Task B: Verifier - Optional Standalone
 Run:
 ``` bash
-python3 taskB.py example.in example.out
+python3 taskB.py
 ```
+When prompted:
+- Enter the input file name (ex: example.in)
+- Enter the output file name (ex: example.out)
+
 The Verifier prints either:
 - Valid Stable
 - Invalid: <reason>
